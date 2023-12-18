@@ -1,0 +1,83 @@
+---
+doctrine:
+  dbal:
+    connections:
+      customer:
+        driver: pdo_pgsql
+        url: '%env(resolve:DATABASE_URL_CUSTOMER)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+      default:
+        driver: pdo_mysql
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+    default_connection: default
+    #profiling_collect_backtrace: '%kernel.debug%'
+  orm:
+    entity_managers:
+      customer: # <- Check that this name matches
+        connection: customer
+        # auto_mapping: true
+        mappings:
+          App:
+            alias: App
+            dir: '%kernel.project_dir%/src/Entity'
+            is_bundle: false
+            prefix: App\Entity
+            type: attribute
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+
+      default: # <- Check that this name matches
+        connection: default
+        # auto_generate_proxy_classes: true
+        auto_mapping: true
+        # enable_lazy_ghost_objects: true
+        mappings:
+          App:
+            alias: App
+            dir: '%kernel.project_dir%/src/Entity'
+            is_bundle: false
+            prefix: App\Entity
+            type: attribute
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+
+    # auto_generate_proxy_classes: true
+    # auto_mapping: true
+    # enable_lazy_ghost_objects: true
+    # mappings:
+    #   App:
+    #     alias: App
+    #     dir: '%kernel.project_dir%/src/Entity'
+    #     is_bundle: false
+    #     prefix: App\Entity
+    #     type: attribute
+    # naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+    # report_fields_where_declared: true
+    # validate_xml_mapping: true
+when@prod:
+  doctrine:
+    orm:
+      auto_generate_proxy_classes: false
+      proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+      query_cache_driver:
+        pool: doctrine.system_cache_pool
+        type: pool
+      result_cache_driver:
+        pool: doctrine.result_cache_pool
+        type: pool
+  framework:
+    cache:
+      pools:
+        doctrine.result_cache_pool:
+          adapter: cache.app
+        doctrine.system_cache_pool:
+          adapter: cache.system
+when@test:
+  doctrine:
+    dbal:
+      dbname_suffix: _test%env(default::TEST_TOKEN)%        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '15'
