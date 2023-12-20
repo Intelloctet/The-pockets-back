@@ -45,6 +45,8 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
     access_control:
+        - { path: ^/signin,roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/allUsers,roles: ROLE_USER }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

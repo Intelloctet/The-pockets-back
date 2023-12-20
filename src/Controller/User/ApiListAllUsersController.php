@@ -22,7 +22,7 @@ class ApiListAllUsersController extends AbstractController
         $this->user = $user;
         $this->regManager = $doctrine;
     }
-    #[Route('/api/allUsers', name: 'app_user_api_list_all_users')]
+    #[Route('/api/v1/allUsers', name: 'app_user_api_list_all_users',methods:['GET'])]
     public function index(): JsonResponse
     {
         $users = $this->user->findAll();

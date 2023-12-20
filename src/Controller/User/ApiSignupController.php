@@ -88,7 +88,7 @@ class ApiSignupController extends AbstractController
             $em->flush();
 
             return new JsonResponse([
-                'message' => 'User create succefully!',
+                'message' => 'User create successfully!',
                 'status' => 'success'
             ]);
         } catch (\Exception $ex) {

@@ -3,3 +3,8 @@ lexik_jwt_authentication:
     public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     token_ttl: 3600 # in seconds, default is 3600
+
+    # Add or modify the "payload" configuration
+    # payload:
+    #     user_id: id
+    #     roles: ['ROLE_USER']  # Customize roles as needed
