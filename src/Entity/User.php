@@ -41,6 +41,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\Column]
+    private ?bool $isBlocked = null;
+
+    #[ORM\Column]
+    private ?bool $isDeleted = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Profil $profil = null;
+
+    #[ORM\Column(length: 10)]
+    private ?string $typeOfPassword = null;
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -143,6 +155,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function isIsBlocked(): ?bool
+    {
+        return $this->isBlocked;
+    }
+
+    public function setIsBlocked(bool $isBlocked): static
+    {
+        $this->isBlocked = $isBlocked;
+
+        return $this;
+    }
+
+    public function isIsDeleted(): ?bool
+    {
+        return $this->isDeleted;
+    }
+
+    public function setIsDeleted(bool $isDeleted): static
+    {
+        $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
+    public function getProfil(): ?Profil
+    {
+        return $this->profil;
+    }
+
+    public function setProfil(?Profil $profil): static
+    {
+        $this->profil = $profil;
+
+        return $this;
+    }
+
+    public function getTypeOfPassword(): ?string
+    {
+        return $this->typeOfPassword;
+    }
+
+    public function setTypeOfPassword(string $typeOfPassword): static
+    {
+        $this->typeOfPassword = $typeOfPassword;
 
         return $this;
     }

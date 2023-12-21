@@ -2,13 +2,17 @@
 
 namespace App\Controller\User;
 
+use App\Entity\Profil;
 use App\Entity\User;
+use App\Enumeration\User\PassType;
 use App\Repository\UserRepository;
 use App\Services\String\Sanitized;
+use App\Services\Verify\IsStrongPassword;
 use App\Services\Verify\IsValid;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,14 +43,30 @@ class ApiSignupController extends AbstractController
         $data = json_decode($request->getContent()); // get request as object
 
         $username = isset($data->username) ? Sanitized::stringValue($data->username) : null;
+        $typeOfPassword = isset($data->typeOfPassword) ? Sanitized::stringValue($data->typeOfPassword) : null; //to handle
         $password = isset($data->password) ? $data->password : null; //to handle
         $phone = isset($data->phone) ? Sanitized::stringValue($data->phone) : null; // to handle
 
+        $firstname = isset($data->firstname) ? Sanitized::stringValue($data->firstname) : null;
+        $lastname = isset($data->lastname) ? Sanitized::stringValue($data->lastname) : null;
+        $birthday = isset($data->birthday) ? Sanitized::stringValue($data->birthday) : null; //to handle : date format dd-mm-YYYY
+        $country = isset($data->country) ? Sanitized::stringValue($data->country) : null;
+
+        /** Check date format */
+        try {
+            if ($birthday)
+                $birthday = new DateTime($data->birthday); //to handle : date format dd-mm-YYYY
+        } catch (Exception $ex) {
+            return $this->json(array(
+                'message' => 'Invalid date format! Try like this dd-mm-yyyy',
+                'status' => Response::HTTP_BAD_REQUEST
+            ));
+        }
         /** Check username validation */
         if (!$username)
             return $this->json(array(
                 'message' => 'Username cannot be empty',
-                'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY ,//Validation with  error,
+                'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY, //Validation with  error,
                 'status' => 'error'
             ));
 
@@ -55,34 +75,69 @@ class ApiSignupController extends AbstractController
         if ($user_exist)
             return $this->json(array(
                 'message' => 'Username already exist! Choose other!',
-                'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY ,//Validation with  error,
+                'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY, //Validation with  error,
                 'status' => 'error'
             ));
 
-        /** Check phone validation */
-        if (!$password) {
+        /** Check password validation */
+        if ($password) {
+            if (!$typeOfPassword)
+                return $this->json(array(
+                    'message' => 'Password type cannot be empty',
+                    'status' => 'error'
+                ),Response::HTTP_BAD_REQUEST);
+
+            switch (strtolower($typeOfPassword)) {
+                case PassType::PIN: {
+                        if (!IsStrongPassword::pin($password))
+                            return $this->json(array(
+                                'message' => 'Invalid PIN code! [it\'s should be numbers and length equal 4]',
+                                'status' => 'error'
+                            ),Response::HTTP_BAD_REQUEST);
+                    }
+                    break;
+                case PassType::LOW: {
+                        if (!IsStrongPassword::low($password))
+                            return $this->json(array(
+                                'message' => 'Invalid password code! [it\'s length should be 8 at least]',
+                                'status' => 'error'
+                            ),Response::HTTP_BAD_REQUEST);
+                    }
+                    break;
+
+                default: {
+                    }
+                    break;
+            }
+        } else {
             return $this->json(array(
-                'message' => 'Invalid password',
-                'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY, //Validation with  error
+                'message' => 'Password cannot be empty or null',
                 'status' => 'error'
-            ));
+            ),Response::HTTP_BAD_REQUEST);
         }
         /** Check phone validation */
         if ($phone) {
             if (!IsValid::phoneNumber($phone))
                 return $this->json(array(
                     'message' => 'Invalid phone number',
-                    'errorMsg' => Response::HTTP_UNPROCESSABLE_ENTITY, //Validation with  error
                     'status' => 'error'
-                ));
+                ),Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         try {
-            
+
             $user = new User();
-            $hashPassword = $this->passwordHasher->hashPassword($user,$password);
-            $user->setUsername($username)->setPassword($hashPassword)->setPhone($phone)
-                 ->setCreatedAt($now)->setUpdatedAt(null);
+            $profil = new Profil();
+
+            $hashPassword = $this->passwordHasher->hashPassword($user, $password);
+            $user->setUsername($username)->setPassword($hashPassword)->setPhone($phone)->setProfil($profil)
+                ->setIsBlocked(false)->setIsDeleted(false)
+                ->setCreatedAt($now)->setUpdatedAt(null);
+
+            $profil->setFirstname($firstname)->setLastname($lastname)->setCountry($country)->setBirthday($birthday)
+            ->setIsDeleted(false)
+            ->setCreatedAt($now);
+
             $em = $this->regManager->getManager('customer');
             $em->persist($user);
             $em->flush();
