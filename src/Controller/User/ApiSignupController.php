@@ -128,30 +128,33 @@ class ApiSignupController extends AbstractController
 
             $user = new User();
             $profil = new Profil();
-
-            $hashPassword = $this->passwordHasher->hashPassword($user, $password);
-            $user->setUsername($username)->setPassword($hashPassword)->setPhone($phone)->setProfil($profil)
-                ->setIsBlocked(false)->setIsDeleted(false)
-                ->setCreatedAt($now)->setUpdatedAt(null);
-
             $profil->setFirstname($firstname)->setLastname($lastname)->setCountry($country)->setBirthday($birthday)
             ->setIsDeleted(false)
-            ->setCreatedAt($now);
+            ->setCreatedAt($now)->setUpdatedAt(null);
+
+            $hashPassword = $this->passwordHasher->hashPassword($user, $password);
+            
+            $user->setUsername($username)->setPassword($hashPassword)->setPhone($phone)->setProfil($profil)
+                ->setIsBlocked(false)->setIsDeleted(false)->setTypeOfPassword($typeOfPassword)
+                ->setCreatedAt($now)->setUpdatedAt(null);
+
+           
 
             $em = $this->regManager->getManager('customer');
             $em->persist($user);
             $em->flush();
+           
 
             return new JsonResponse([
                 'message' => 'User create successfully!',
                 'status' => 'success'
             ]);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             return new JsonResponse([
                 'message' => 'Cannot create user!',
                 'status' => 'error',
                 'errorMsg' => $ex
-            ]);
+            ],500);
         }
     }
 }
