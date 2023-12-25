@@ -153,7 +153,7 @@ class ApiSignupController extends AbstractController
             return new JsonResponse([
                 'message' => 'Cannot create user!',
                 'status' => 'error',
-                'errorMsg' => $ex
+                'errorMsg' =>  $ex->getMessage(),
             ],500);
         }
     }

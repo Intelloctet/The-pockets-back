@@ -8,7 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
+
 
 #[ORM\Table(name :"users")]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -18,11 +20,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[Groups(['getUser'])]
     private ?Uuid $id = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column]
     private array $roles = [];
 
@@ -32,24 +37,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column(length: 15)]
     private ?string $phone = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column]
     private ?bool $isBlocked = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column]
     private ?bool $isDeleted = null;
 
+    #[Groups(['getUser'])]
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Profil $profil = null;
 
+    #[Groups(['getUser'])]
     #[ORM\Column(length: 10)]
     private ?string $typeOfPassword = null;
 

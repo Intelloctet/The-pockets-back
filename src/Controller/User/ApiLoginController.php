@@ -66,6 +66,18 @@ class ApiLoginController extends AbstractController
                     'status' => 'error'
                 ), Response::HTTP_UNPROCESSABLE_ENTITY);
 
+            if ($user_exist->isIsBlocked())
+                return $this->json(array(
+                    'message' => 'This username was blocked!',
+                    'status' => 'error'
+                ), Response::HTTP_UNPROCESSABLE_ENTITY);
+
+            if ($user_exist->isIsDeleted())
+                return $this->json(array(
+                    'message' => 'This username was deleted!',
+                    'status' => 'error'
+                ), Response::HTTP_UNPROCESSABLE_ENTITY);
+
             // Customize the payload (claims) of the JWT
             $payload = array(
                 'user_id' => $user_exist->getId(),  // Adjust this based on your User entity
@@ -73,7 +85,7 @@ class ApiLoginController extends AbstractController
                 'phone' => $user_exist->getPhone(),
             );
 
-            $token = $this->jwtManager->createFromPayload($user_exist,$payload);
+            $token = $this->jwtManager->createFromPayload($user_exist, $payload);
         } catch (\Exception $ex) {
             return $this->json(array(
                 'message' => 'Maybe database offline!',
