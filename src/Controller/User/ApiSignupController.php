@@ -2,8 +2,8 @@
 
 namespace App\Controller\User;
 
-use App\Entity\Profil;
-use App\Entity\User;
+use App\Entity\User\Profil;
+use App\Entity\User\User;
 use App\Enumeration\User\PassType;
 use App\Repository\UserRepository;
 use App\Services\String\Sanitized;

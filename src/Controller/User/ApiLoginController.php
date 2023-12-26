@@ -2,7 +2,7 @@
 
 namespace App\Controller\User;
 
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Repository\UserRepository;
 use App\Services\String\Sanitized;
 use Doctrine\ORM\EntityManagerInterface;
